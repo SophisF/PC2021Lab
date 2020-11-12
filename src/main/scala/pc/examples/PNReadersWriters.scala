@@ -7,24 +7,24 @@ import pc.utils.MSet
 object PNReadersWriters extends App {
 
   object place extends Enumeration {
-    val A, B, C, D,E,F,G = Value
+    val IDLE, CHOOSE, READREQ, WRITEREQ, LOCK, READING, WRITING = Value
   }
   type Place = place.Value
   import place._
 
   // DSL-like specification of A Petri Net
   def readersWritersSystem() = toSystem(PetriNet[Place](
-    MSet(A) ~~> MSet(B),
+    MSet(IDLE) ~~> MSet(CHOOSE),
     //readers
-    MSet(B) ~~> MSet(C),
-    MSet(C, E) ~~> MSet(F, E),
-    MSet(F) ~~> MSet(A),
+    MSet(CHOOSE) ~~> MSet(READREQ),
+    MSet(READREQ, LOCK) ~~> MSet(READING, LOCK),
+    MSet(READING) ~~> MSet(IDLE),
     //writers
-    MSet(B) ~~> MSet(D),
-    MSet(D, E) ~~> MSet(G) ^^^ MSet(F),
-    MSet(G) ~~> MSet(E, A)
+    MSet(CHOOSE) ~~> MSet(WRITEREQ),
+    MSet(WRITEREQ, LOCK) ~~> MSet(WRITING) ^^^ MSet(READING),
+    MSet(WRITING) ~~> MSet(LOCK, IDLE)
   ))
 
   // example usage
-  println(readersWritersSystem().paths(MSet(A,E),10).toList.mkString("\n"))
+  println(readersWritersSystem().paths(MSet(IDLE,LOCK),10).toList.mkString("\n"))
 }
