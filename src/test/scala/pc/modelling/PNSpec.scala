@@ -1,6 +1,7 @@
 package pc.modelling
 
 import org.scalatest.FlatSpec
+import pc.examples.PNReadersWritersNoStarvation
 
 class PNSpec extends FlatSpec{
 
@@ -10,6 +11,7 @@ class PNSpec extends FlatSpec{
 
   val pnME = PNMutualExclusion.mutualExclusionSystem()
   val pnRW = PNReadersWriters.readersWritersSystem()
+  val pnRWnoS = PNReadersWritersNoStarvation.readersWritersSystem()
 
   "PN for mutual exclusion" should "properly generate 7-length paths" in {
     val expected1 = List(MSet(N,N), MSet(T,N), MSet(T,T), MSet(C,T), MSet(T), MSet(C), MSet())
@@ -24,6 +26,16 @@ class PNSpec extends FlatSpec{
   "ReadersWriters PN for mutual exclusion" should "not fail" in {
     val expected = List(MSet(READING,WRITING), MSet(WRITING,WRITING), MSet(WRITING,LOCK),
         MSet(LOCK,WRITING), MSet(WRITING,READING))
-    assert(!pnRW.paths(MSet(IDLE, LOCK),100).toSet.contains(expected))
+    assert(!pnRW.paths(MSet(IDLE, LOCK),70).toSet.contains(expected))
   }
+
+  //TODO review
+  "ReadersWritersNoStarvation " should "deal writers not only readers" in {
+    val firstSet = pnRWnoS.paths(MSet(IDLE, LOCK), 70).toList
+    val index = firstSet.indexOf(List(MSet(WRITEREQ)))
+    assert(if (index > 0) firstSet.splitAt(index)._2.splitAt(2)._1.contains(List(MSet(WRITING))) else true)
+  }
+
+
+
 }
