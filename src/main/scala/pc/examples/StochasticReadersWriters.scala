@@ -27,9 +27,11 @@ object StochasticReadersWriters extends App {
     (MSet(WRITING), _=>0.2, MSet(LOCK, IDLE), MSet())
   )
 
-
   val rwAnalysis = CTMCSimulation(toCTMC(stocReadersWriters))
-  println(rwAnalysis.newSimulationTrace(MSet(IDLE, IDLE, LOCK),new Random)
+
+  println(rwAnalysis.newSimulationTrace(MSet(READING, IDLE, LOCK),new Random)
     .take(20)
     .toList.mkString("\n"))
+
+  //println(MSet(READING, READING).asMap.get(READING).getOrElse(10))
 }

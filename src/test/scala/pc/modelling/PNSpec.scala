@@ -31,9 +31,12 @@ class PNSpec extends FlatSpec{
 
   //TODO review
   "ReadersWritersNoStarvation " should "deal writers not only readers" in {
-    val firstSet = pnRWnoS.paths(MSet(IDLE, LOCK), 70).toList
-    val index = firstSet.indexOf(List(MSet(WRITEREQ)))
-    assert(if (index > 0) firstSet.splitAt(index)._2.splitAt(2)._1.contains(List(MSet(WRITING))) else true)
+    val expected1 = List(MSet(LOCK, WRITEREQ), MSet(WRITEREQ, LOCK))
+    val firstSet = pnRWnoS.paths(MSet(IDLE, LOCK), 20).toSet
+    //println("SET is" + firstSet)
+    val toWrite = if (firstSet.contains(expected1)) firstSet.contains(List(MSet(WRITING))) else true
+    val writeRead = firstSet.contains(List(MSet(READREQ, WRITEREQ), MSet(WRITEREQ, READREQ)))
+    assert(toWrite && !writeRead)
   }
 
 
