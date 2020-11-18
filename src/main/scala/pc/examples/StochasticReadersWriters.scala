@@ -14,13 +14,13 @@ object StochasticReadersWriters extends App {
 
   type State = place.Value
   import place._
-
+  var token = 1
   val stocReadersWriters = SPN[State](
     (MSet(IDLE), _=> 1.0, MSet(CHOOSE), MSet()),
     //readers
     (MSet(CHOOSE), _ => 200000.0, MSet(READEREQ), MSet()),
     (MSet(READEREQ, LOCK), _=>100000.0, MSet(READING, LOCK), MSet()),
-    (MSet(READING), _=>0.1, MSet(IDLE), MSet()), //TODO vedi rate p6
+    (MSet(READING), _=>0.1*token, MSet(IDLE), MSet()), //TODO vedi rate p6
     //writers
     (MSet(CHOOSE), _=> 100000.0, MSet(WRITEREQ), MSet()),
     (MSet(WRITEREQ, LOCK), _=>100000.0, MSet(WRITING), MSet(READING)),
@@ -29,9 +29,12 @@ object StochasticReadersWriters extends App {
 
   val rwAnalysis = CTMCSimulation(toCTMC(stocReadersWriters))
 
-  println(rwAnalysis.newSimulationTrace(MSet(READING, IDLE, LOCK),new Random)
+  println(rwAnalysis.newSimulationTrace(MSet(IDLE, LOCK),new Random)
     .take(20)
-    .toList.mkString("\n"))
+    .toList
+    .foreach(e => {token = e._2.asMap.getOrElse(READING, 1)}))
+
+ // case MSet(READING) : token =
 
   //println(MSet(READING, READING).asMap.get(READING).getOrElse(10))
 }
