@@ -28,13 +28,17 @@ object StochasticReadersWriters extends App {
   )
 
   val rwAnalysis = CTMCSimulation(toCTMC(stocReadersWriters))
+  val rwAnalysisToPrint = rwAnalysis.newSimulationTrace(MSet(IDLE, LOCK, READING, READEREQ),new Random).take(20).toList
 
-  println(rwAnalysis.newSimulationTrace(MSet(IDLE, LOCK),new Random)
+  println(rwAnalysisToPrint.mkString("\n"))
+  println(rwAnalysisToPrint.foreach(e => {token = e._2.asMap.getOrElse(READING, 1)}))
+
+  /*println(rwAnalysis.newSimulationTrace(MSet(IDLE, LOCK),new Random)
     .take(20)
     .toList
-    .foreach(e => {token = e._2.asMap.getOrElse(READING, 1)}))
+    .foreach(e => {token = e._2.asMap.getOrElse(READING, 1)})
+  )*/
 
- // case MSet(READING) : token =
 
   //println(MSet(READING, READING).asMap.get(READING).getOrElse(10))
 }
