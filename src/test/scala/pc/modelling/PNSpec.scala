@@ -1,7 +1,8 @@
 package pc.modelling
 
 import org.scalatest.FlatSpec
-import pc.examples.PNReadersWritersNoStarvation
+import pc.examples.PNReadersWritersDesigner.{list, readersWritersSystem}
+import pc.examples.{PNReadersWritersDesigner, PNReadersWritersNoStarvation}
 
 class PNSpec extends FlatSpec{
 
@@ -26,19 +27,15 @@ class PNSpec extends FlatSpec{
   "ReadersWriters PN for mutual exclusion" should "not fail" in {
     val expected = List(MSet(READING,WRITING), MSet(WRITING,WRITING), MSet(WRITING,LOCK),
         MSet(LOCK,WRITING), MSet(WRITING,READING))
-    assert(!pnRW.paths(MSet(IDLE, LOCK),70).toSet.contains(expected))
+    assert(!pnRW.paths(MSet(IDLE, LOCK),100).toSet.contains(expected))
   }
 
   //TODO review
-  "ReadersWritersNoStarvation " should "deal writers not only readers" in {
-    val expected1 = List(MSet(LOCK, WRITEREQ), MSet(WRITEREQ, LOCK))
-    val firstSet = pnRWnoS.paths(MSet(IDLE, LOCK), 20).toSet
-    //println("SET is" + firstSet)
-    val toWrite = if (firstSet.contains(expected1)) firstSet.contains(List(MSet(WRITING))) else true
-    val writeRead = firstSet.contains(List(MSet(READREQ, WRITEREQ), MSet(WRITEREQ, READREQ)))
-    assert(toWrite && !writeRead)
+  "ReadersWritersDesigner " should "deal all reading request" in {
+    val list = PNReadersWritersDesigner.readersWritersSystem().paths(MSet(IDLE, IDLE, LOCK),10).toList
+    val x = list.map(e => e.filter(t => t.asList.indexOf(READREQ) >= 0 ))
+    val y = list.map(e => e.filter(t => t.asList.indexOf(READING) >= 0 ))
+    assert(x.length == y.length)
   }
-
-
 
 }
